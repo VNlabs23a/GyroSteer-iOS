@@ -1,45 +1,47 @@
-# [Project name]
+# GyroSteer iOS
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+GyroSteer turns an iPhone into an adjustable gyro steering wheel and sends its inputs to a Windows PC gamepad receiver.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/gyrosteer-ios run dev` — run the Expo app preview
+- `pnpm --filter @workspace/gyrosteer-ios run typecheck` — typecheck the mobile app
+- Windows receiver setup and firewall notes: `artifacts/gyrosteer-ios/PC_RECEIVER.md`
+- Keep the iPhone and PC on the same Wi-Fi; the receiver defaults to port 8080.
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- pnpm workspace, Expo SDK 57, React Native, TypeScript
+- iPhone gyro input: `expo-sensors`
+- Local preferences: AsyncStorage
+- PC bridge: Python WebSocket + UDP server, ViGEm virtual Xbox 360 controller
 
 ## Where things live
-
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/gyrosteer-ios/app/index.tsx` — steering screen, motion sensor, WebSocket sender, and controls
+- `artifacts/gyrosteer-ios/constants/colors.ts` — cockpit theme tokens
+- `artifacts/gyrosteer-ios/support/gyrosteer_pc_receiver.py` — iOS and Android-compatible PC receiver
+- `artifacts/gyrosteer-ios/PC_RECEIVER.md` — Windows setup instructions
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- iOS uses WebSocket JSON; Android's existing binary UDP packets remain supported by the same receiver.
+- Wheel preferences stay on the iPhone; no account or hosted service is needed.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Adjustable steering range, sensitivity, deadzone, linearity, and recentering
+- On-screen shifters, throttle, brake, and mapped gamepad buttons
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+No cross-project preferences recorded.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- iOS uses WebSocket because Expo Go does not expose raw UDP sockets.
+- If Windows Firewall prompts, allow Python on private networks.
 
 ## Pointers
 
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- See `artifacts/gyrosteer-ios/PC_RECEIVER.md` for Windows receiver setup.
+- See the `pnpm-workspace` skill for workspace structure and package management.

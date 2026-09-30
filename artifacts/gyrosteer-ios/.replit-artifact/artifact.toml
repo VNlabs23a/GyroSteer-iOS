@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/"
+title = "GyroSteer iOS"
+description = "A native iPhone steering wheel app that uses motion sensors to send configurable steering, pedals, and button input over Wi-Fi to the user's Windows PC receiver using the existing GyroSteer UDP protocol."
+version = "1.0.0"
+id = "artifacts/gyrosteer-ios"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/" ]
+localPort = 19450
+
+[services.development]
+run = "pnpm --filter @workspace/gyrosteer-ios run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/gyrosteer-ios", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/gyrosteer-ios", "run", "serve" ]
+
+[services.env]
+PORT = "19450"
+BASE_PATH = "/"
