@@ -1,0 +1,227 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A123456789ABCDEF1234560D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A123456789ABCDEF12345607 /* AppDelegate.swift */; };
+		A123456789ABCDEF1234560E /* WheelModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A123456789ABCDEF12345609 /* WheelModel.swift */; };
+		A123456789ABCDEF1234560F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A123456789ABCDEF1234560A /* ContentView.swift */; };
+		A123456789ABCDEF12345610 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A123456789ABCDEF1234560B /* Theme.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A123456789ABCDEF12345603 /* GyroSteer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GyroSteer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A123456789ABCDEF12345607 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		A123456789ABCDEF12345608 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A123456789ABCDEF12345609 /* WheelModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WheelModel.swift; sourceTree = "<group>"; };
+		A123456789ABCDEF1234560A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A123456789ABCDEF1234560B /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A123456789ABCDEF12345613 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A123456789ABCDEF12345604 = {
+			isa = PBXGroup;
+			children = (
+				A123456789ABCDEF12345605 /* GyroSteer */,
+				A123456789ABCDEF12345606 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A123456789ABCDEF12345605 /* GyroSteer */ = {
+			isa = PBXGroup;
+			children = (
+				A123456789ABCDEF12345607 /* AppDelegate.swift */,
+				A123456789ABCDEF12345608 /* Info.plist */,
+				A123456789ABCDEF12345609 /* WheelModel.swift */,
+				A123456789ABCDEF1234560A /* ContentView.swift */,
+				A123456789ABCDEF1234560B /* Theme.swift */,
+			);
+			path = GyroSteer;
+			sourceTree = "<group>";
+		};
+		A123456789ABCDEF12345606 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A123456789ABCDEF12345603 /* GyroSteer.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A123456789ABCDEF12345602 /* GyroSteer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A123456789ABCDEF12345616 /* Build configuration list for PBXNativeTarget "GyroSteer" */;
+			buildPhases = (
+				A123456789ABCDEF12345612 /* Sources */,
+				A123456789ABCDEF12345613 /* Frameworks */,
+				A123456789ABCDEF12345614 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = GyroSteer;
+			productName = GyroSteer;
+			productReference = A123456789ABCDEF12345603 /* GyroSteer.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A123456789ABCDEF12345612 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A123456789ABCDEF1234560D /* AppDelegate.swift in Sources */,
+				A123456789ABCDEF1234560E /* WheelModel.swift in Sources */,
+				A123456789ABCDEF1234560F /* ContentView.swift in Sources */,
+				A123456789ABCDEF12345610 /* Theme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A123456789ABCDEF12345614 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXProject section */
+		A123456789ABCDEF12345601 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					A123456789ABCDEF12345602 = {
+						CreatedOnToolsVersion = 16.0;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = A123456789ABCDEF12345615 /* Build configuration list for PBXProject "GyroSteer" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A123456789ABCDEF12345604;
+			productRefGroup = A123456789ABCDEF12345606 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A123456789ABCDEF12345602 /* GyroSteer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		A123456789ABCDEF12345617 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A123456789ABCDEF12345618 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		A123456789ABCDEF12345619 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = GyroSteer/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gyrosteer.ios15;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A123456789ABCDEF1234561A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = GyroSteer/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gyrosteer.ios15;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A123456789ABCDEF12345615 /* Build configuration list for PBXProject "GyroSteer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A123456789ABCDEF12345617 /* Debug */,
+				A123456789ABCDEF12345618 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A123456789ABCDEF12345616 /* Build configuration list for PBXNativeTarget "GyroSteer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A123456789ABCDEF12345619 /* Debug */,
+				A123456789ABCDEF1234561A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A123456789ABCDEF12345601 /* Project object */;
+}
