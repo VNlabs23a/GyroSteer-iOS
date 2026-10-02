@@ -53,6 +53,10 @@ final class WheelModel: NSObject, ObservableObject, URLSessionWebSocketDelegate 
     @Published private(set) var isConnecting = false
     @Published private(set) var packetCount = 0
     @Published private(set) var connectionMessage = "PC not connected"
+    @Published private(set) var gyroAvailable = false
+    @Published private(set) var gyroActive = false
+    @Published private(set) var gyroStatus = "CHECKING GYRO"
+    @Published private(set) var gyroRate = 0.0
 
     private let motionManager = CMMotionManager()
     private var session: URLSession?
@@ -77,6 +81,8 @@ final class WheelModel: NSObject, ObservableObject, URLSessionWebSocketDelegate 
         deadzone = defaults.object(forKey: PreferenceKey.deadzone) as? Double ?? 2
         linearity = defaults.object(forKey: PreferenceKey.linearity) as? Double ?? 1.2
         super.init()
+        gyroAvailable = motionManager.isGyroAvailable
+        startGyroscope()
     }
 
     func toggleConnection() {
@@ -151,7 +157,6 @@ final class WheelModel: NSObject, ObservableObject, URLSessionWebSocketDelegate 
         connectionTimeout = nil
         sendTimer?.invalidate()
         sendTimer = nil
-        motionManager.stopGyroUpdates()
 
         let oldSocket = socket
         socket = nil
@@ -176,8 +181,18 @@ final class WheelModel: NSObject, ObservableObject, URLSessionWebSocketDelegate 
     }
 
     func pauseForBackground() {
-        guard isConnected || isConnecting else { return }
-        stopSession(message: "Paused while GyroSteer is in the background")
+        if isConnected || isConnecting {
+            stopSession(message: "Paused while GyroSteer is in the background")
+        }
+        motionManager.stopGyroUpdates()
+        gyroActive = false
+        gyroRate = 0
+        gyroStatus = "GYRO PAUSED"
+        lastSampleTimestamp = 0
+    }
+
+    func resumeFromForeground() {
+        startGyroscope()
     }
 
     func recenter() {
@@ -222,7 +237,6 @@ final class WheelModel: NSObject, ObservableObject, URLSessionWebSocketDelegate 
         filteredAngle = 0
         gyroBias = 0
         lastSampleTimestamp = 0
-        startGyroscope()
         receiveNextMessage(from: webSocketTask)
 
         let timer = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
@@ -258,14 +272,29 @@ final class WheelModel: NSObject, ObservableObject, URLSessionWebSocketDelegate 
     }
 
     private func startGyroscope() {
+        guard motionManager.isGyroAvailable else {
+            gyroAvailable = false
+            gyroActive = false
+            gyroStatus = "GYRO UNAVAILABLE"
+            return
+        }
+        gyroAvailable = true
+        guard !motionManager.isGyroActive else { return }
+
         motionManager.gyroUpdateInterval = 1.0 / 60.0
+        gyroStatus = "STARTING GYRO"
         motionManager.startGyroUpdates(to: .main) { [weak self] sample, error in
             guard let self else { return }
             if let error {
-                self.stopSession(message: "Gyroscope error — \(error.localizedDescription)")
+                self.motionManager.stopGyroUpdates()
+                self.gyroActive = false
+                self.gyroStatus = "GYRO ERROR"
                 return
             }
             guard let sample else { return }
+            self.gyroActive = true
+            self.gyroStatus = "GYRO ACTIVE"
+            self.gyroRate = sample.rotationRate.z
             self.integrateGyroscope(rate: sample.rotationRate.z, timestamp: sample.timestamp)
         }
     }

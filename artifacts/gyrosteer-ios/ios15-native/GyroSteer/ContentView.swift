@@ -37,13 +37,52 @@ struct ContentView: View {
     }
 
     var body: some View {
-        ZStack {
-            WheelTheme.background.ignoresSafeArea()
+        GeometryReader { geometry in
+            ZStack {
+                WheelTheme.background.ignoresSafeArea()
+                if geometry.size.width > geometry.size.height {
+                    landscapeLayout
+                } else {
+                    portraitLayout
+                }
+            }
+        }
+        .preferredColorScheme(.dark)
+    }
+
+    private var portraitLayout: some View {
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: 12) {
+                header
+                connectionCard
+                steeringCard
+                controlsCard
+                if showingExtraControls {
+                    extraControlsCard
+                }
+                if showingSettings {
+                    settingsCard
+                }
+            }
+            .padding(.horizontal, 15)
+            .padding(.top, 10)
+            .padding(.bottom, 24)
+            .frame(maxWidth: 560)
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var landscapeLayout: some View {
+        HStack(alignment: .top, spacing: 8) {
+            VStack(spacing: 8) {
+                header
+                landscapeSteeringCard
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+
             ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 12) {
-                    header
+                VStack(spacing: 8) {
                     connectionCard
-                    steeringCard
                     controlsCard
                     if showingExtraControls {
                         extraControlsCard
@@ -52,14 +91,14 @@ struct ContentView: View {
                         settingsCard
                     }
                 }
-                .padding(.horizontal, 15)
-                .padding(.top, 10)
-                .padding(.bottom, 24)
-                .frame(maxWidth: 560)
-                .frame(maxWidth: .infinity)
+                .padding(.bottom, 8)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .preferredColorScheme(.dark)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .frame(maxWidth: 1000, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var header: some View {
@@ -223,7 +262,7 @@ struct ContentView: View {
                     .cornerRadius(10)
             }
 
-            WheelArtwork(angle: model.angle)
+            WheelArtwork(angle: model.angle, size: 156)
                 .frame(maxWidth: .infinity)
                 .frame(height: 164)
 
@@ -280,6 +319,93 @@ struct ContentView: View {
                 .stroke(WheelTheme.border, lineWidth: 1)
         )
         .cornerRadius(16)
+    }
+
+    private var landscapeSteeringCard: some View {
+        VStack(spacing: 6) {
+            HStack {
+                sectionTitle("STEERING")
+                Spacer(minLength: 4)
+                Text("\(Int(model.maxAngle))°")
+                    .font(.system(size: 8, weight: .heavy, design: .rounded))
+                    .foregroundColor(WheelTheme.primary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 4)
+                    .background(WheelTheme.background)
+                    .cornerRadius(8)
+            }
+
+            HStack(spacing: 6) {
+                WheelArtwork(angle: model.angle, size: 112)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(String(format: "%+.0f°", model.angle))
+                        .font(.system(size: 24, weight: .heavy, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(WheelTheme.foreground)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+
+                    HStack(spacing: 4) {
+                        Text("AXIS")
+                            .font(.system(size: 8, weight: .bold, design: .rounded))
+                            .foregroundColor(WheelTheme.muted)
+                        Text(String(format: "%+.2f", model.steering))
+                            .font(.system(size: 12, weight: .heavy, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundColor(WheelTheme.primary)
+                    }
+
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(WheelTheme.wheelRim)
+                            Rectangle()
+                                .fill(WheelTheme.muted)
+                                .frame(width: 1, height: 10)
+                                .position(
+                                    x: geometry.size.width / 2,
+                                    y: geometry.size.height / 2
+                                )
+                            Circle()
+                                .fill(WheelTheme.primary)
+                                .frame(width: 8, height: 8)
+                                .position(
+                                    x: geometry.size.width * CGFloat(
+                                        0.5 + clampValue(model.steering, -1, 1) * 0.46
+                                    ),
+                                    y: geometry.size.height / 2
+                                )
+                        }
+                    }
+                    .frame(height: 10)
+
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(model.gyroActive ? WheelTheme.primary : WheelTheme.accent)
+                            .frame(width: 6, height: 6)
+                        Text(model.gyroStatus)
+                            .font(.system(size: 7, weight: .heavy, design: .rounded))
+                            .tracking(0.3)
+                            .foregroundColor(model.gyroActive ? WheelTheme.primary : WheelTheme.accent)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                    }
+
+                    Text(String(format: "Z %+.3f rad/s", model.gyroRate))
+                        .font(.system(size: 8, weight: .medium, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(WheelTheme.muted)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(10)
+        .background(WheelTheme.card)
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(WheelTheme.border, lineWidth: 1)
+        )
+        .cornerRadius(14)
     }
 
     private var controlsCard: some View {
@@ -410,43 +536,46 @@ struct ContentView: View {
 
 private struct WheelArtwork: View {
     let angle: Double
+    let size: CGFloat
+
+    private var scale: CGFloat { size / 156 }
 
     var body: some View {
         ZStack {
             Circle()
                 .fill(WheelTheme.wheelFace)
-                .overlay(Circle().stroke(WheelTheme.wheelRim, lineWidth: 10))
+                .overlay(Circle().stroke(WheelTheme.wheelRim, lineWidth: 10 * scale))
             Capsule()
                 .fill(WheelTheme.wheelSpoke)
-                .frame(width: 118, height: 13)
+                .frame(width: 118 * scale, height: 13 * scale)
             Capsule()
                 .fill(WheelTheme.wheelSpoke)
-                .frame(width: 13, height: 118)
+                .frame(width: 13 * scale, height: 118 * scale)
             Circle()
                 .fill(WheelTheme.wheelHub)
-                .frame(width: 55, height: 55)
+                .frame(width: 55 * scale, height: 55 * scale)
                 .overlay(
-                    Circle().stroke(WheelTheme.primary.opacity(0.9), lineWidth: 2)
+                    Circle().stroke(WheelTheme.primary.opacity(0.9), lineWidth: 2 * scale)
                 )
             VStack(spacing: 1) {
                 Image(systemName: "scope")
-                    .font(.system(size: 19, weight: .semibold))
+                    .font(.system(size: 19 * scale, weight: .semibold))
                     .foregroundColor(WheelTheme.primary)
                 Text("GS")
-                    .font(.system(size: 8, weight: .heavy, design: .rounded))
-                    .tracking(1)
+                    .font(.system(size: 8 * scale, weight: .heavy, design: .rounded))
+                    .tracking(1 * scale)
                     .foregroundColor(WheelTheme.primary)
             }
             VStack {
                 Capsule()
                     .fill(WheelTheme.accent)
-                    .frame(width: 11, height: 7)
-                    .offset(y: 4)
+                    .frame(width: 11 * scale, height: 7 * scale)
+                    .offset(y: 4 * scale)
                 Spacer()
             }
-            .frame(height: 146)
+            .frame(height: 146 * scale)
         }
-        .frame(width: 156, height: 156)
+        .frame(width: size, height: size)
         .rotationEffect(.degrees(angle))
         .animation(.linear(duration: 0.025), value: angle)
     }

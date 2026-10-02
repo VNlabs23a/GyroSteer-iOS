@@ -1,13 +1,14 @@
 # GyroSteer for iOS 15
 
-This is a separate native Swift/Xcode version of GyroSteer for older iPhones.
+This is a separate, landscape-only native Swift/Xcode version of GyroSteer for older iPhones.
 It leaves the Expo app in the parent directory unchanged and sets its iOS
 deployment target to **iOS 15.0**.
 
 It uses only Apple frameworks: CoreMotion for gyro steering, SwiftUI for the
-controls, and URLSession WebSocket for the PC connection. The JSON packet fields
-and button bits match `../support/gyrosteer_pc_receiver.py`, so the Windows
-receiver does not need a second protocol.
+controls, and URLSession WebSocket for the PC connection. The gyro readout and
+wheel respond even before the PC connects. The JSON packet fields and button
+bits match `../support/gyrosteer_pc_receiver.py`, so the Windows receiver does
+not need a second protocol.
 
 ## Build on macOS
 
