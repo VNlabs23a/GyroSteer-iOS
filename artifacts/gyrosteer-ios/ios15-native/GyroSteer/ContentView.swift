@@ -509,7 +509,9 @@ private struct HoldButton: View {
         )
         .accessibilityLabel(title)
         .accessibilityValue(isPressed ? "Pressed" : "Not pressed")
-        .accessibilityAction(.activate, pulseForAccessibility)
+        .accessibilityAction {
+            pulseForAccessibility()
+        }
         .onDisappear { setPressed(false) }
     }
 
