@@ -30,6 +30,11 @@ struct ContentView: View {
         GridItem(.flexible(), spacing: 8)
     ]
 
+    private let buttonColumns = [
+        GridItem(.flexible(), spacing: 4),
+        GridItem(.flexible(), spacing: 4)
+    ]
+
     private var statusColor: Color {
         if model.isConnected { return WheelTheme.primary }
         if model.isConnecting { return WheelTheme.accent }
@@ -38,38 +43,381 @@ struct ContentView: View {
 
     var body: some View {
         GeometryReader { geometry in
+            let contentWidth = max(0, geometry.size.width - 24)
+            let wheelSize = max(
+                108,
+                min(geometry.size.height * 0.50, contentWidth * 0.36 - 18)
+            )
             ZStack {
                 WheelTheme.background.ignoresSafeArea()
-                if geometry.size.width > geometry.size.height {
-                    landscapeLayout
-                } else {
-                    portraitLayout
+
+                VStack(spacing: 6) {
+                    cockpitHeader
+
+                    HStack(alignment: .top, spacing: 6) {
+                        steeringPanel(wheelSize: wheelSize)
+                            .frame(minWidth: contentWidth * 0.36, maxWidth: contentWidth * 0.36)
+                            .frame(maxHeight: .infinity)
+
+                        VStack(spacing: 6) {
+                            connectionPanel
+                            tuningPanel
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                        }
+                        .frame(minWidth: contentWidth * 0.31, maxWidth: contentWidth * 0.31)
+                        .frame(maxHeight: .infinity, alignment: .top)
+
+                        buttonsPanel
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    }
+                    .frame(maxHeight: .infinity, alignment: .top)
                 }
+                .padding(.horizontal, 6)
+                .padding(.vertical, 5)
+                .frame(maxWidth: 1200, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .preferredColorScheme(.dark)
     }
 
-    private var portraitLayout: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 12) {
-                header
-                connectionCard
-                steeringCard
-                controlsCard
-                if showingExtraControls {
-                    extraControlsCard
-                }
-                if showingSettings {
-                    settingsCard
+    private var cockpitHeader: some View {
+        HStack(spacing: 7) {
+            Image(systemName: "steeringwheel")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(WheelTheme.primary)
+                .frame(width: 24)
+
+            VStack(alignment: .leading, spacing: 0) {
+                Text("GYROSTEER")
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .tracking(1.4)
+                    .foregroundColor(WheelTheme.foreground)
+                Text("PHONE WHEEL · PC BRIDGE")
+                    .font(.system(size: 7, weight: .bold, design: .rounded))
+                    .tracking(0.8)
+                    .foregroundColor(WheelTheme.muted)
+            }
+
+            Spacer(minLength: 4)
+
+            HStack(spacing: 5) {
+                Circle()
+                    .fill(statusColor)
+                    .frame(width: 7, height: 7)
+                Text(model.isConnected ? "PC ONLINE" : (model.isConnecting ? "CONNECTING" : "PC OFFLINE"))
+                    .font(.system(size: 8, weight: .heavy, design: .rounded))
+                    .tracking(0.5)
+                    .foregroundColor(WheelTheme.foreground)
+                    .lineLimit(1)
+                if model.isConnected {
+                    Text("\(model.packetCount) PKT")
+                        .font(.system(size: 7, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(WheelTheme.muted)
                 }
             }
-            .padding(.horizontal, 15)
-            .padding(.top, 10)
-            .padding(.bottom, 24)
-            .frame(maxWidth: 560)
-            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 8)
+            .frame(height: 24)
+            .background(WheelTheme.card)
+            .cornerRadius(8)
         }
+        .frame(height: 28)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func steeringPanel(wheelSize: CGFloat) -> some View {
+        VStack(spacing: 4) {
+            HStack(spacing: 5) {
+                sectionTitle("LIVE STEERING")
+                Spacer(minLength: 2)
+                Text("\(Int(model.maxAngle))°")
+                    .font(.system(size: 8, weight: .heavy, design: .rounded))
+                    .foregroundColor(WheelTheme.primary)
+                Button(action: model.recenter) {
+                    Image(systemName: "scope")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(WheelTheme.foreground)
+                        .frame(width: 22, height: 21)
+                        .background(WheelTheme.background)
+                        .cornerRadius(6)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .accessibilityLabel("Recenter steering wheel")
+            }
+
+            WheelArtwork(angle: model.angle, size: wheelSize)
+                .frame(maxWidth: .infinity)
+                .frame(height: wheelSize)
+
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(String(format: "%+.0f°", model.angle))
+                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(WheelTheme.foreground)
+                Spacer(minLength: 3)
+                Text("AXIS")
+                    .font(.system(size: 7, weight: .bold, design: .rounded))
+                    .foregroundColor(WheelTheme.muted)
+                Text(String(format: "%+.3f", model.steering))
+                    .font(.system(size: 11, weight: .heavy, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(WheelTheme.primary)
+            }
+
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(WheelTheme.wheelRim)
+                    Rectangle()
+                        .fill(WheelTheme.muted.opacity(0.7))
+                        .frame(width: 1, height: 8)
+                        .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+                    Circle()
+                        .fill(abs(model.steering) > 0.94 ? WheelTheme.accent : WheelTheme.primary)
+                        .frame(width: 7, height: 7)
+                        .position(
+                            x: geometry.size.width * CGFloat(
+                                0.5 + clampValue(model.steering, -1, 1) * 0.46
+                            ),
+                            y: geometry.size.height / 2
+                        )
+                }
+            }
+            .frame(height: 8)
+
+            HStack(spacing: 4) {
+                Circle()
+                    .fill(model.gyroActive ? WheelTheme.primary : WheelTheme.accent)
+                    .frame(width: 6, height: 6)
+                Text(model.gyroStatus)
+                    .font(.system(size: 7, weight: .heavy, design: .rounded))
+                    .foregroundColor(model.gyroActive ? WheelTheme.primary : WheelTheme.accent)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Spacer(minLength: 2)
+                Text(String(format: "Z %+.2f rad/s", model.gyroRate))
+                    .font(.system(size: 7, weight: .medium, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(WheelTheme.muted)
+                    .lineLimit(1)
+            }
+        }
+        .padding(8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(WheelTheme.card)
+        .overlay(
+            RoundedRectangle(cornerRadius: 13)
+                .stroke(WheelTheme.border, lineWidth: 1)
+        )
+        .cornerRadius(13)
+    }
+
+    private var connectionPanel: some View {
+        VStack(spacing: 3) {
+            HStack {
+                sectionTitle("PC CONNECTION")
+                Spacer(minLength: 2)
+                Text("WI-FI")
+                    .font(.system(size: 7, weight: .bold, design: .rounded))
+                    .foregroundColor(WheelTheme.muted)
+            }
+
+            HStack(spacing: 4) {
+                TextField("PC IP address", text: $model.host)
+                    .font(.system(size: 8, weight: .medium, design: .rounded))
+                    .foregroundColor(WheelTheme.foreground)
+                    .keyboardType(.numbersAndPunctuation)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .disabled(model.isConnected || model.isConnecting)
+                    .accessibilityLabel("PC IP address")
+                    .padding(.horizontal, 6)
+                    .frame(maxWidth: .infinity, minHeight: 28)
+                    .background(WheelTheme.background)
+                    .cornerRadius(7)
+
+                TextField("8080", text: $model.port)
+                    .font(.system(size: 8, weight: .medium, design: .rounded))
+                    .foregroundColor(WheelTheme.foreground)
+                    .keyboardType(.numberPad)
+                    .disabled(model.isConnected || model.isConnecting)
+                    .accessibilityLabel("PC port")
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 3)
+                    .frame(width: 38)
+                    .frame(minHeight: 28)
+                    .background(WheelTheme.background)
+                    .cornerRadius(7)
+
+                Button(action: model.toggleConnection) {
+                    HStack(spacing: 3) {
+                        Image(systemName: model.isConnected || model.isConnecting ? "stop.fill" : "wifi")
+                            .font(.system(size: 8, weight: .bold))
+                        Text(model.isConnected || model.isConnecting ? "STOP" : "GO")
+                            .font(.system(size: 7, weight: .heavy, design: .rounded))
+                    }
+                    .foregroundColor(model.isConnected ? WheelTheme.foreground : WheelTheme.primaryInk)
+                    .frame(width: 48, height: 28)
+                    .background(model.isConnected ? WheelTheme.cardRaised : WheelTheme.primary)
+                    .cornerRadius(7)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .accessibilityLabel(model.isConnected || model.isConnecting ? "Disconnect from PC" : "Connect to PC")
+            }
+
+            Text(model.connectionMessage)
+                .font(.system(size: 7, weight: .medium, design: .rounded))
+                .foregroundColor(statusColor)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(6)
+        .background(WheelTheme.card)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(WheelTheme.border, lineWidth: 1)
+        )
+        .cornerRadius(12)
+    }
+
+    private var tuningPanel: some View {
+        VStack(spacing: 2) {
+            HStack(spacing: 4) {
+                sectionTitle("FINE TUNING")
+                Spacer(minLength: 1)
+                Button(action: resetTuning) {
+                    Text("RESET")
+                        .font(.system(size: 7, weight: .heavy, design: .rounded))
+                        .tracking(0.3)
+                        .foregroundColor(WheelTheme.primary)
+                        .padding(.horizontal, 5)
+                        .frame(height: 18)
+                        .background(WheelTheme.background)
+                        .cornerRadius(5)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .accessibilityLabel("Reset wheel tuning to defaults")
+            }
+
+            FineTuningRow(
+                title: "ROTATION",
+                rangeLabel: "180–1080°",
+                valueLabel: "\(Int(model.maxAngle))°",
+                value: $model.maxAngle,
+                bounds: 180...1080,
+                step: 10
+            )
+            FineTuningRow(
+                title: "SENSITIVITY",
+                rangeLabel: "1–8×",
+                valueLabel: String(format: "%.1f×", model.sensitivity),
+                value: $model.sensitivity,
+                bounds: 1...8,
+                step: 0.1
+            )
+            FineTuningRow(
+                title: "DEADZONE",
+                rangeLabel: "0–10%",
+                valueLabel: String(format: "%.1f%%", model.deadzone),
+                value: $model.deadzone,
+                bounds: 0...10,
+                step: 0.1
+            )
+            FineTuningRow(
+                title: "LINEARITY",
+                rangeLabel: "0.6–2.0",
+                valueLabel: String(format: "%.2f", model.linearity),
+                value: $model.linearity,
+                bounds: 0.6...2,
+                step: 0.05
+            )
+
+            Spacer(minLength: 0)
+        }
+        .padding(6)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(WheelTheme.card)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(WheelTheme.border, lineWidth: 1)
+        )
+        .cornerRadius(12)
+    }
+
+    private var buttonsPanel: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 3) {
+                sectionTitle("DRIVING BUTTONS")
+                Spacer(minLength: 1)
+                Text("HOLD")
+                    .font(.system(size: 6, weight: .heavy, design: .rounded))
+                    .foregroundColor(WheelTheme.muted)
+            }
+
+            LazyVGrid(columns: buttonColumns, spacing: 4) {
+                HoldButton(title: "SHIFT DOWN", symbol: "minus", kind: .neutral, height: 25) {
+                    model.setButton(bit: 0, pressed: $0)
+                }
+                HoldButton(title: "SHIFT UP", symbol: "plus", kind: .neutral, height: 25) {
+                    model.setButton(bit: 1, pressed: $0)
+                }
+                HoldButton(title: "BRAKE", symbol: "minus", kind: .brake, height: 25) {
+                    model.setBrake($0)
+                }
+                HoldButton(title: "THROTTLE", symbol: "chevron.up", kind: .throttle, height: 25) {
+                    model.setThrottle($0)
+                }
+                HoldButton(title: "NITRO", symbol: "bolt.fill", kind: .accent, height: 25) {
+                    model.setButton(bit: 2, pressed: $0)
+                }
+                HoldButton(title: "HANDBRAKE", symbol: "hand.raised.fill", kind: .neutral, height: 25) {
+                    model.setButton(bit: 3, pressed: $0)
+                }
+                ForEach(ExtraControl.all) { control in
+                    HoldButton(title: control.title, symbol: control.symbol, kind: .neutral, height: 25) {
+                        model.setButton(bit: control.bit, pressed: $0)
+                    }
+                }
+            }
+            .frame(maxHeight: .infinity, alignment: .top)
+        }
+        .padding(6)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(WheelTheme.card)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(WheelTheme.border, lineWidth: 1)
+        )
+        .cornerRadius(12)
+    }
+
+    private func resetTuning() {
+        model.maxAngle = 900
+        model.sensitivity = 4
+        model.deadzone = 2
+        model.linearity = 1.2
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
+    private var portraitLayout: some View {
+        VStack(spacing: 12) {
+            header
+            connectionCard
+            steeringCard
+            controlsCard
+            if showingExtraControls {
+                extraControlsCard
+            }
+            if showingSettings {
+                settingsCard
+            }
+        }
+        .padding(.horizontal, 15)
+        .padding(.top, 10)
+        .padding(.bottom, 24)
+        .frame(maxWidth: 560)
+        .frame(maxWidth: .infinity)
     }
 
     private var landscapeLayout: some View {
@@ -80,19 +428,17 @@ struct ContentView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
 
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 8) {
-                    connectionCard
-                    controlsCard
-                    if showingExtraControls {
-                        extraControlsCard
-                    }
-                    if showingSettings {
-                        settingsCard
-                    }
+            VStack(spacing: 8) {
+                connectionCard
+                controlsCard
+                if showingExtraControls {
+                    extraControlsCard
                 }
-                .padding(.bottom, 8)
+                if showingSettings {
+                    settingsCard
+                }
             }
+            .padding(.bottom, 8)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .padding(.horizontal, 8)
@@ -612,11 +958,11 @@ private struct HoldButton: View {
 
     var body: some View {
         Button(action: {}) {
-            VStack(spacing: 5) {
+            VStack(spacing: 3) {
                 Image(systemName: symbol)
-                    .font(.system(size: 14, weight: .heavy))
+                    .font(.system(size: 12, weight: .heavy))
                 Text(title)
-                    .font(.system(size: 8, weight: .heavy, design: .rounded))
+                    .font(.system(size: 7, weight: .heavy, design: .rounded))
                     .tracking(0.5)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
@@ -722,5 +1068,67 @@ private struct TuningRow<Control: View>: View {
                 .accentColor(WheelTheme.primary)
                 .frame(height: 24)
         }
+    }
+}
+
+private struct FineTuningRow: View {
+    let title: String
+    let rangeLabel: String
+    let valueLabel: String
+    @Binding var value: Double
+    let bounds: ClosedRange<Double>
+    let step: Double
+
+    var body: some View {
+        VStack(spacing: 1) {
+            HStack(spacing: 2) {
+                Text("\(title) · \(rangeLabel)")
+                    .font(.system(size: 7, weight: .bold, design: .rounded))
+                    .foregroundColor(WheelTheme.muted)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+
+                Spacer(minLength: 1)
+
+                Text(valueLabel)
+                    .font(.system(size: 8, weight: .heavy, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(WheelTheme.primary)
+            }
+
+            HStack(spacing: 3) {
+                nudgeButton(symbol: "minus", label: "Decrease \(title)", direction: -1)
+
+                Slider(value: $value, in: bounds, step: step)
+                    .accentColor(WheelTheme.primary)
+                    .frame(height: 18)
+                    .accessibilityLabel(title)
+
+                nudgeButton(symbol: "plus", label: "Increase \(title)", direction: 1)
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func nudgeButton(
+        symbol: String,
+        label: String,
+        direction: Double
+    ) -> some View {
+        Button {
+            let currentStep = ((value - bounds.lowerBound) / step).rounded()
+            let nextValue = bounds.lowerBound + (currentStep + direction) * step
+            value = min(max(nextValue, bounds.lowerBound), bounds.upperBound)
+        } label: {
+            Image(systemName: symbol)
+                .font(.system(size: 8, weight: .heavy))
+                .foregroundColor(WheelTheme.foreground)
+                .frame(width: 22, height: 21)
+                .background(WheelTheme.cardRaised)
+                .cornerRadius(6)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .accessibilityLabel(label)
+        .accessibilityHint("Adjust by \(step)")
     }
 }

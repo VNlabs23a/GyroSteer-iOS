@@ -3,6 +3,8 @@
 This is a separate, landscape-only native Swift/Xcode version of GyroSteer for older iPhones.
 It leaves the Expo app in the parent directory unchanged and sets its iOS
 deployment target to **iOS 15.0**.
+The landscape cockpit is non-scrolling, with the full steering wheel, fine
+tuning, PC connection, and driving buttons visible together.
 
 It uses only Apple frameworks: CoreMotion for gyro steering, SwiftUI for the
 controls, and URLSession WebSocket for the PC connection. The gyro readout and
@@ -34,7 +36,7 @@ the receiver, then enter the PC's local IP address in GyroSteer.
 ## Project contents
 
 - `GyroSteer.xcodeproj` — Xcode project and shared build scheme
-- `GyroSteer/ContentView.swift` — compact steering, pedals, and button controls
+- `GyroSteer/ContentView.swift` — fixed cockpit, live steering, fine tuning, and driving buttons
 - `GyroSteer/WheelModel.swift` — gyro integration, settings, and WebSocket sender
 - `GyroSteer/Info.plist` — iOS 15 deployment permissions and scene configuration
 

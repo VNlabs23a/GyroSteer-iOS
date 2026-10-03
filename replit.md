@@ -14,7 +14,7 @@ GyroSteer turns an iPhone into an adjustable gyro steering wheel and sends its i
 ## Stack
 
 - pnpm workspace, Expo SDK 57, React Native, TypeScript
-- Separate landscape-only SwiftUI/Xcode target for iOS 15 devices; its gyro runs independently of the PC connection and it does not downgrade or replace the Expo app
+- Separate landscape-only, non-scrolling SwiftUI/Xcode cockpit for iOS 15 devices; it keeps tuning and driving buttons visible, runs gyro independently of the PC connection, and does not downgrade or replace the Expo app
 - iPhone gyro input: `expo-sensors`
 - Local preferences: AsyncStorage
 - PC bridge: Python WebSocket + UDP server, ViGEm virtual Xbox 360 controller
